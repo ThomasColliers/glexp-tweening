@@ -72,7 +72,7 @@ void setupContext(void){
     uniformManager = new UniformManager(diffuseShader,sizeof(uniforms)/sizeof(char*),uniforms);
 
     // setup geometry
-    plane = &GeometryFactory::plane(200.0f,200.0f,0.0f,0.0f,0.0f);
+    plane = &GeometryFactory::plane(50.0f,50.0f,0.0f,0.0f,0.0f);
     cube = &GeometryFactory::cube(1.0f);
     
     // setup textures
@@ -90,19 +90,16 @@ void render(void){
     modelViewMatrix.multMatrix(mCamera);
 
     // floor
+    modelViewMatrix.pushMatrix();
     Matrix44f floorm;
-    static float rotation = 0.0f;
-    rotation += 0.01f;
     rotationMatrix44(floorm, -PI/2, 1.0f, 0.0f, 0.0f);
-    //floorFrame.getMatrix(floorm);
     modelViewMatrix.multMatrix(floorm);
     glUseProgram(diffuseShader);
     glBindTexture(GL_TEXTURE_2D, textureManager.get("textures/pavement.jpg"));
     glUniformMatrix4fv(uniformManager->get("mvpMatrix"),1,GL_FALSE,transformPipeline.getModelViewProjectionMatrix());
     glUniformMatrix4fv(uniformManager->get("mvMatrix"),1,GL_FALSE,transformPipeline.getModelViewMatrix());
     glUniformMatrix3fv(uniformManager->get("normalMatrix"),1,GL_FALSE,transformPipeline.getNormalMatrix());
-    //GLfloat lightPosition[] = {2.0f,2.0f,2.0f};
-    GLfloat lightPosition[] = {0.0f,200.0f,0.0f};
+    GLfloat lightPosition[] = {2.0f,2.0f,2.0f};
     glUniform3fv(uniformManager->get("lightPosition"),1,lightPosition);
     GLfloat ambientColor[] = {0.2f, 0.2f, 0.2f, 1.0f};
     glUniform4fv(uniformManager->get("ambientColor"),1,ambientColor);
@@ -113,8 +110,21 @@ void render(void){
     glUniform1f(uniformManager->get("shinyness"),128.0f);
     glUniform1i(uniformManager->get("textureUnit"),0);
     plane->draw();
+    modelViewMatrix.popMatrix();
 
     // objects
+    glBindTexture(GL_TEXTURE_2D, textureManager.get("textures/pavement.jpg"));
+    for(int i = 0; i < 3; i++){
+        modelViewMatrix.pushMatrix();
+        Matrix44f transl;
+        translationMatrix(transl, -2.1f+i*2.1f, 1.0f, 0.0f);
+        modelViewMatrix.multMatrix(transl);
+        glUniformMatrix4fv(uniformManager->get("mvpMatrix"),1,GL_FALSE,transformPipeline.getModelViewProjectionMatrix());
+        glUniformMatrix4fv(uniformManager->get("mvMatrix"),1,GL_FALSE,transformPipeline.getModelViewMatrix());
+        glUniformMatrix3fv(uniformManager->get("normalMatrix"),1,GL_FALSE,transformPipeline.getNormalMatrix());
+        cube->draw();
+        modelViewMatrix.popMatrix();
+    }
 
     modelViewMatrix.popMatrix();
 }
