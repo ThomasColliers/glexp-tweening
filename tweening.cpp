@@ -5,6 +5,8 @@
 #include <boost/filesystem.hpp>
 #include <GL/glew.h>
 #include <GL/glfw.h>
+#include <claw/tween/single_tweener.hpp>
+#include <claw/tween/easing/easing_linear.hpp>
 
 #include "ShaderManager.h"
 #include "TriangleBatch.h"
@@ -33,12 +35,14 @@ MatrixStack projectionMatrix;
 // objects
 Geometry* plane;
 Geometry* cube;
+// positions
+double zs[3];
+claw::tween::single_tweener* tweens[3];
 // texture
 TextureManager textureManager;
 // uniform locations
 UniformManager* uniformManager;
 
-// TODO: add some objects to the scene
 // TODO: animate them in different ways (libclaw)
 // TODO: use a catmull-rom animation on the camera
 // TODO: look at camera class I bookmarked
@@ -74,9 +78,15 @@ void setupContext(void){
     // setup geometry
     plane = &GeometryFactory::plane(50.0f,50.0f,0.0f,0.0f,0.0f);
     cube = &GeometryFactory::cube(1.0f);
+
+    zs[0] = 0.0f; zs[1] = 0.0f; zs[2] = 0.0f;
+    // start up the tweens
+    tweens[0] = new claw::tween::single_tweener(zs[0], 10.0f, 10, claw::tween::easing_linear::ease_in);
+    tweens[1] = new claw::tween::single_tweener(zs[1], 10.0f, 10, claw::tween::easing_linear::ease_in);
+    tweens[2] = new claw::tween::single_tweener(zs[2], 10.0f, 10, claw::tween::easing_linear::ease_in);
     
     // setup textures
-    const char* textures[] = {"textures/pavement.jpg"};
+    const char* textures[] = {"textures/pavement.jpg","textures/box.jpg"};
     textureManager.loadTextures(sizeof(textures)/sizeof(char*),textures,GL_TEXTURE_2D,GL_TEXTURE0);
 }
 
@@ -113,11 +123,12 @@ void render(void){
     modelViewMatrix.popMatrix();
 
     // objects
-    glBindTexture(GL_TEXTURE_2D, textureManager.get("textures/pavement.jpg"));
+    glBindTexture(GL_TEXTURE_2D, textureManager.get("textures/box.jpg"));
     for(int i = 0; i < 3; i++){
+        tweens[i]->update(0.1);
         modelViewMatrix.pushMatrix();
         Matrix44f transl;
-        translationMatrix(transl, -2.1f+i*2.1f, 1.0f, 0.0f);
+        translationMatrix(transl, -2.1f+i*2.1f, 1.0f, zs[i]);
         modelViewMatrix.multMatrix(transl);
         glUniformMatrix4fv(uniformManager->get("mvpMatrix"),1,GL_FALSE,transformPipeline.getModelViewProjectionMatrix());
         glUniformMatrix4fv(uniformManager->get("mvMatrix"),1,GL_FALSE,transformPipeline.getModelViewMatrix());
