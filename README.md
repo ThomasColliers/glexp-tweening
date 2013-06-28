@@ -1,4 +1,4 @@
 OpenGL Experiment - Tweening
 ============================
 
-Objectives: tweening, better camera control
+Objectives: working with a Tweening library.

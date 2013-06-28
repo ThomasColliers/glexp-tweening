@@ -47,10 +47,6 @@ TextureManager textureManager;
 // uniform locations
 UniformManager* uniformManager;
 
-// TODO: use a catmull-rom animation on the camera
-// TODO: look at camera class I bookmarked
-// TODO: set up a UI to change the camera control points
-
 void doTweens(void){
     if(tweens) delete tweens;
     tweens = new claw::tween::tweener_group();
@@ -96,10 +92,6 @@ void setupContext(void){
     // start up the tweens
     tweenPhase = false;
     doTweens();
-
-    /*tweens[0] = new claw::tween::single_tweener(zs[0], 10.0f, 10, claw::tween::easing_linear::ease_in_out);
-    tweens[1] = new claw::tween::single_tweener(zs[1], 10.0f, 10, claw::tween::easing_back::ease_out);
-    tweens[2] = new claw::tween::single_tweener(zs[2], 10.0f, 10, claw::tween::easing_quad::ease_in_out);*/
     
     // setup textures
     const char* textures[] = {"textures/pavement.jpg","textures/box.jpg"};
