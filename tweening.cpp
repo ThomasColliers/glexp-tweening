@@ -7,6 +7,8 @@
 #include <GL/glfw.h>
 #include <claw/tween/single_tweener.hpp>
 #include <claw/tween/easing/easing_linear.hpp>
+#include <claw/tween/easing/easing_back.hpp>
+#include <claw/tween/easing/easing_quad.hpp>
 
 #include "ShaderManager.h"
 #include "TriangleBatch.h"
@@ -81,9 +83,9 @@ void setupContext(void){
 
     zs[0] = 0.0f; zs[1] = 0.0f; zs[2] = 0.0f;
     // start up the tweens
-    tweens[0] = new claw::tween::single_tweener(zs[0], 10.0f, 10, claw::tween::easing_linear::ease_in);
-    tweens[1] = new claw::tween::single_tweener(zs[1], 10.0f, 10, claw::tween::easing_linear::ease_in);
-    tweens[2] = new claw::tween::single_tweener(zs[2], 10.0f, 10, claw::tween::easing_linear::ease_in);
+    tweens[0] = new claw::tween::single_tweener(zs[0], 10.0f, 10, claw::tween::easing_linear::ease_in_out);
+    tweens[1] = new claw::tween::single_tweener(zs[1], 10.0f, 10, claw::tween::easing_back::ease_out);
+    tweens[2] = new claw::tween::single_tweener(zs[2], 10.0f, 10, claw::tween::easing_quad::ease_in_out);
     
     // setup textures
     const char* textures[] = {"textures/pavement.jpg","textures/box.jpg"};
