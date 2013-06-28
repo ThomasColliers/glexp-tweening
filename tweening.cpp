@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include <GL/glfw.h>
 #include <claw/tween/single_tweener.hpp>
+#include <claw/tween/tweener_group.hpp>
 #include <claw/tween/easing/easing_linear.hpp>
 #include <claw/tween/easing/easing_back.hpp>
 #include <claw/tween/easing/easing_quad.hpp>
@@ -39,16 +40,26 @@ Geometry* plane;
 Geometry* cube;
 // positions
 double zs[3];
-claw::tween::single_tweener* tweens[3];
+claw::tween::tweener_group* tweens;
+bool tweenPhase;
 // texture
 TextureManager textureManager;
 // uniform locations
 UniformManager* uniformManager;
 
-// TODO: animate them in different ways (libclaw)
 // TODO: use a catmull-rom animation on the camera
 // TODO: look at camera class I bookmarked
 // TODO: set up a UI to change the camera control points
+
+void doTweens(void){
+    if(tweens) delete tweens;
+    tweens = new claw::tween::tweener_group();
+    tweens->insert(claw::tween::single_tweener(zs[0],tweenPhase ? 0.0f : 10.0f, 10, claw::tween::easing_linear::ease_in_out));
+    tweens->insert(claw::tween::single_tweener(zs[1],tweenPhase ? 0.0f : 10.0f, 10, claw::tween::easing_back::ease_out));
+    tweens->insert(claw::tween::single_tweener(zs[2],tweenPhase ? 0.0f : 10.0f, 10, claw::tween::easing_quad::ease_in_out));
+    tweens->on_finished(doTweens);
+    tweenPhase = !tweenPhase;
+}
 
 void setupContext(void){
     // general state
@@ -83,9 +94,12 @@ void setupContext(void){
 
     zs[0] = 0.0f; zs[1] = 0.0f; zs[2] = 0.0f;
     // start up the tweens
-    tweens[0] = new claw::tween::single_tweener(zs[0], 10.0f, 10, claw::tween::easing_linear::ease_in_out);
+    tweenPhase = false;
+    doTweens();
+
+    /*tweens[0] = new claw::tween::single_tweener(zs[0], 10.0f, 10, claw::tween::easing_linear::ease_in_out);
     tweens[1] = new claw::tween::single_tweener(zs[1], 10.0f, 10, claw::tween::easing_back::ease_out);
-    tweens[2] = new claw::tween::single_tweener(zs[2], 10.0f, 10, claw::tween::easing_quad::ease_in_out);
+    tweens[2] = new claw::tween::single_tweener(zs[2], 10.0f, 10, claw::tween::easing_quad::ease_in_out);*/
     
     // setup textures
     const char* textures[] = {"textures/pavement.jpg","textures/box.jpg"};
@@ -124,10 +138,12 @@ void render(void){
     plane->draw();
     modelViewMatrix.popMatrix();
 
+    // update tweens
+    if(tweens) tweens->update(0.1);
+
     // objects
     glBindTexture(GL_TEXTURE_2D, textureManager.get("textures/box.jpg"));
     for(int i = 0; i < 3; i++){
-        tweens[i]->update(0.1);
         modelViewMatrix.pushMatrix();
         Matrix44f transl;
         translationMatrix(transl, -2.1f+i*2.1f, 1.0f, zs[i]);
